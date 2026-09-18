@@ -22,6 +22,7 @@
 
 | Field | Character Limit | Value | Notes |
 |---|:---:|---|---|
+| **Package Name / App ID** | N/A | `com.mahethekiller.equationbubbles` | Production Android package name and application ID. |
 | **App Title** | 30 chars | `Equation Bubbles: Kids Math` | Clean, highly searchable keyword pairing (`Kids Math`, `Equation`). Exact length: 27 chars. |
 | **Alternative Title** | 30 chars | `Equation Bubbles: Math Games` | High-volume keyword match for "Math Games". Exact length: 28 chars. |
 | **Short Description** | 80 chars | `Pop floating paper bubbles to solve fun math puzzles! Learn addition to division.` | Action-oriented, highlights core gameplay, math scope, and tactile theme. Exact length: 80 chars. |

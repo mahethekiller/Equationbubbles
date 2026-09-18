@@ -1,4 +1,4 @@
-package com.equationbubbles.game;
+package com.mahethekiller.equationbubbles;
 
 import com.getcapacitor.BridgeActivity;
 
