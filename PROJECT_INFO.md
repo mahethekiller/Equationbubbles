@@ -86,5 +86,10 @@
   1. **Sticky Bottom Banner:** Displayed on non-gameplay screens (`MainMenuScene`, `LevelSelectScene`). Automatically hidden via `AdService.hideBanner()` during gameplay so floating bubbles and math equations are never obscured.
   2. **Milestone Interstitial:** Triggered after level completion in `GameScene.handleLevelVictory()`. Enforces a 90-second minimum cooldown and a 3-level completion threshold to avoid interrupting children.
   3. **Rewarded Video Revive:** Voluntary player reward on Game Over in `ResultsModal.js` (`🎬 REVIVE (+3 ❤️)`). Watching an ad restores 3 hearts and extra time, continuing the current stage without losing score progress.
+* **Production AdMob IDs:**
+  - **App ID:** `ca-app-pub-7746616500591109~9120970170`
+  - **Banner Ad Unit ID:** `ca-app-pub-7746616500591109/6851609065`
+  - **Interstitial Ad Unit ID:** `ca-app-pub-7746616500591109/5538527391`
+  - **Rewarded Ad Unit ID:** `ca-app-pub-7746616500591109/2890603740`
 * **Zero-Crash Web Dev Fallback:** Seamless mock behavior when running in standard browser/Vite dev server, logging ad events and allowing uninterrupted testing without native hardware.
 

@@ -24,11 +24,14 @@ class AdService {
     this.levelsCompletedSinceLastAd = 0;
     this.interstitialLevelThreshold = 3; // Show every 3 completed levels
 
-    // Official Google AdMob Test Ad Unit IDs for Android
+    // Whether to request test ads (true in local dev, false in production build)
+    this.isTesting = import.meta.env.DEV;
+
+    // Google AdMob Production Ad Unit IDs
     this.adUnits = {
-      banner: 'ca-app-pub-3940256099942544/6300978111',
-      interstitial: 'ca-app-pub-3940256099942544/1033173712',
-      rewarded: 'ca-app-pub-3940256099942544/5224354917'
+      banner: 'ca-app-pub-7746616500591109/6851609065',
+      interstitial: 'ca-app-pub-7746616500591109/5538527391',
+      rewarded: 'ca-app-pub-7746616500591109/2890603740'
     };
   }
 
@@ -48,7 +51,7 @@ class AdService {
       await AdMob.initialize({
         requestTrackingAuthorization: false,
         testingDevices: ['EMULATOR'],
-        initializeForTesting: true
+        initializeForTesting: this.isTesting
       });
 
       console.log('[AdService] AdMob Native SDK Initialized successfully.');
@@ -77,7 +80,7 @@ class AdService {
         adSize: BannerAdSize.ADAPTIVE_BANNER,
         position: BannerAdPosition.BOTTOM_CENTER,
         margin: 0,
-        isTesting: true,
+        isTesting: this.isTesting,
         // COPPA & Family Policy Compliance
         npa: true,
         tagForChildDirectedTreatment: true,
@@ -142,7 +145,7 @@ class AdService {
       // Prepare interstitial
       await AdMob.prepareInterstitial({
         adId: this.adUnits.interstitial,
-        isTesting: true,
+        isTesting: this.isTesting,
         npa: true,
         tagForChildDirectedTreatment: true,
         tagForUnderAgeOfConsent: true,
@@ -193,7 +196,7 @@ class AdService {
 
       await AdMob.prepareRewardVideoAd({
         adId: this.adUnits.rewarded,
-        isTesting: true,
+        isTesting: this.isTesting,
         npa: true,
         tagForChildDirectedTreatment: true,
         tagForUnderAgeOfConsent: true,
