@@ -48,10 +48,11 @@ Crafted with a **Scrapbook & Paper-Craft aesthetic**, every button, ribbon, push
   - **Zero Audio Assets:** No `.mp3`, `.ogg`, or `.wav` files needed!
   - Real-time synthesis for bubble pops, cheerful bell chords, error buzzes, page turns, and an ambient pentatonic music-box soundtrack.
 
-- 📚 **Fairytale Adventure Storybook (`LevelSelectScene.js`):**
-  - Interactive book set on a rich mahogany desk with leather casing, gold corner brackets, spine stitching, and a red satin ribbon bookmark.
-  - Chapter narrative cards with whimsical storytelling and milestone landmarks (origami pines, paper mountain peaks, turrets, and treasure chests).
-  - Dog-eared corner page turns with realistic flipping sounds.
+- 🗺️ **Cardboard Winding Trail Level Selector (`LevelSelectScene.js`):**
+  - Cardboard corkboard canvas with torn paper scrap back button and taped world banners.
+  - Interactive torn sticky note tabs for cycling between the 10 thematic worlds.
+  - Winding dotted S-curve path with pushpins, taped badges, padlock states, and 3-star trackers.
+  - Smooth touch and mouse-wheel scrolling for navigating levels.
 
 - 🎯 **Reliable Gameplay Engine:**
   - **Target Guarantee Invariant:** Dynamic per-frame validation ensuring at least one floating bubble always matches the target number.
@@ -98,7 +99,7 @@ Ten progressive worlds carefully scaffold mathematical confidence from basic add
 │   │   └── PaperCraft.js       # Procedural torn polygons, tape, pins, buttons, hearts
 │   ├── scenes/
 │   │   ├── MainMenuScene.js    # Cardboard title screen with 3D letters & preview bubbles
-│   │   ├── LevelSelectScene.js # Open fairytale storybook map with landmarks & page turns
+│   │   ├── LevelSelectScene.js # Winding dotted path with pushpins, taped badges & world tabs
 │   │   ├── GameScene.js        # Core gameplay, anti-overlap physics, pop bursts, confetti
 │   │   ├── SettingsModal.js    # Audio toggles & math-based parental gate
 │   │   └── ResultsModal.js     # Score sheet, star ratings, and next-level progression

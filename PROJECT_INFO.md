@@ -68,10 +68,10 @@
   8. *Division Lagoon (71–80):* Fair sharing and division basics (÷ 2, 3, 5, 10).
   9. *Operation Oasis (81–90):* All 4 operations (+, -, ×, ÷).
   10. *Grandmaster Galaxy (91–100):* High-speed master mix across all operations to 50.
-* **Fairytale Adventure Storybook (`LevelSelectScene.js`):**
-  - **Open Fairytale Book:** Rendered over a rich mahogany wood desk (`Backgrounds.drawWoodTable`) with leather hardcover casing, gold corner brackets, layered parchment pages, center spine crease with stitches, and red satin ribbon bookmark.
-  - **Chapter Story Narrative:** Each world features an illuminated chapter title placard with whimsical 1-sentence kid story prompts (`GameState.CHAPTER_DATA`) and gold star progress badge.
-  - **Treasure Map Trail & Procedural Landmarks:** S-curve winding dotted trail decorated with procedural origami pine trees (`createOrigamiTree`), folded paper mountain peaks (`createPaperMountain`), milestone castles with waving pennants (`createCastleTurret`), and gold treasure chests (`createTreasureChest`).
-  - **Active Level Marker:** Waving red `"HERE!"` pin flag (`createPlayerPinFlag`) mounted on the player's active unlocked stage.
-  - **Dog-Eared Corner Page Turns:** Interactive folded paper corner buttons (`◀ CH. X` and `CH. Y ▶`) with realistic paper-turn audio (`audioSynth.playPageTurn()`) and page flip animation.
+* **Cardboard Winding Trail Level Select (`LevelSelectScene.js`):**
+  - **Cardboard Corkboard Canvas:** Textured cardboard backdrop (`Backgrounds.drawCardboard`) with torn paper scrap back button and taped world banner.
+  - **World Navigation Tabs:** Interactive torn-paper sticky scrap buttons (`◀ PREV WORLD` and `NEXT WORLD ▶`) for cycling between the 10 thematic worlds.
+  - **Winding Dotted S-Curve Path:** Dotted quadratic curve connecting 10 level node badges per world.
+  - **Paper Node Badges:** Multi-layered circular paper badges featuring cast shadows, masking tape strips, colorful plastic pushpins (Yellow, Blue, Green), level number/padlock, and 3-star rating badges.
+  - **Smooth Inertial Touch/Wheel Scrolling:** Smooth scrolling mechanics allowing players to navigate tall paths on both mobile and desktop.
 
