@@ -191,7 +191,7 @@ export class GameScene extends Container {
     this.bubbleLayer.removeChildren();
     this.bubbles = [];
 
-    // Create 6 bubbles in 3 or 4 balanced lanes, staggered vertically
+    // Create 6 bubbles in 3 balanced lanes, staggered vertically
     const playW = Math.min(w * 0.90, 520);
     const startLeft = (w - playW) / 2 + 50;
     const numLanes = 3;
@@ -200,14 +200,27 @@ export class GameScene extends Container {
     const totalBubbles = 6;
     const colors = [0x64b5f6, 0x81c784, 0xff80ab, 0xffb74d, 0xba68c8, 0xfff176, 0x4dd0e1];
 
-    // Guarantee that bubbles 0 and 3 match target (one on screen right away, one coming up)
+    // Pick two random distinct lanes for the two target bubbles (one upper, one lower)
+    const upperTargetLane = Math.floor(Math.random() * numLanes); // 0, 1, or 2 (Left, Center, Right)
+    const otherLanes = [0, 1, 2].filter(l => l !== upperTargetLane);
+    const lowerTargetLane = otherLanes[Math.floor(Math.random() * otherLanes.length)];
+
+    // Shuffled lane ordering for upper group (i = 0, 1, 2) and lower group (i = 3, 4, 5)
+    const topLanes = this.shuffleArray([0, 1, 2]);
+    const bottomLanes = this.shuffleArray([0, 1, 2]);
+    const allLanes = [...topLanes, ...bottomLanes];
+
+    // Find which index in 0..2 got upperTargetLane, and which in 3..5 got lowerTargetLane
+    const targetIdx1 = topLanes.indexOf(upperTargetLane);
+    const targetIdx2 = 3 + bottomLanes.indexOf(lowerTargetLane);
+
     for (let i = 0; i < totalBubbles; i++) {
-      const isTarget = (i === 0 || i === 3);
+      const isTarget = (i === targetIdx1 || i === targetIdx2);
       const eq = isTarget
         ? EquationGenerator.createCorrectEquation(this.currentTarget, this.level)
         : EquationGenerator.createDistractorEquation(this.currentTarget, this.level);
 
-      const colIdx = i % numLanes;
+      const colIdx = allLanes[i];
       const laneX = startLeft + colIdx * laneWidth;
       // Stagger vertical positions: some already mid-screen at start, some below screen
       const startY = h * 0.42 + i * 115;
@@ -216,6 +229,15 @@ export class GameScene extends Container {
       this.bubbleLayer.addChild(bubble);
       this.bubbles.push(bubble);
     }
+  }
+
+  shuffleArray(arr) {
+    const copy = [...arr];
+    for (let i = copy.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [copy[i], copy[j]] = [copy[j], copy[i]];
+    }
+    return copy;
   }
 
   createBubbleNode(eq, laneX, y, color) {
@@ -337,31 +359,48 @@ export class GameScene extends Container {
     const numLanes = 3;
     const laneWidth = (playW - 100) / (numLanes - 1);
 
-    // Pick lane with least bubbles
+    // Count existing bubbles per lane and track which lanes currently have targets
     const laneCounts = [0, 0, 0];
+    const targetLanes = new Set();
+
     this.bubbles.forEach(b => {
-      const col = Math.round((b.laneX - startLeft) / laneWidth);
-      if (col >= 0 && col < numLanes) laneCounts[col]++;
-    });
-    let bestLane = 0;
-    let minCount = 999;
-    laneCounts.forEach((c, idx) => {
-      if (c < minCount) {
-        minCount = c;
-        bestLane = idx;
+      const col = Math.max(0, Math.min(numLanes - 1, Math.round((b.laneX - startLeft) / laneWidth)));
+      laneCounts[col]++;
+      if (b.data.value === this.currentTarget) {
+        targetLanes.add(col);
       }
     });
 
-    const laneX = startLeft + bestLane * laneWidth;
+    // Check if we need another matching bubble
+    const currentMatches = this.bubbles.filter(b => b.data.value === this.currentTarget).length;
+    const needMatch = currentMatches < 2;
+
+    // Pick candidate lanes:
+    // If we need a target match, prioritize lanes that do NOT already have a target bubble
+    let candidateLanes = [0, 1, 2];
+    if (needMatch) {
+      const nonTargetLanes = candidateLanes.filter(c => !targetLanes.has(c));
+      if (nonTargetLanes.length > 0) {
+        candidateLanes = nonTargetLanes;
+      }
+    }
+
+    // Pick lane among candidate lanes with minimum bubble count, breaking ties randomly
+    let minCount = 999;
+    candidateLanes.forEach(c => {
+      if (laneCounts[c] < minCount) minCount = laneCounts[c];
+    });
+    const bestLanes = candidateLanes.filter(c => laneCounts[c] === minCount);
+    const chosenLane = bestLanes[Math.floor(Math.random() * bestLanes.length)];
+
+    const laneX = startLeft + chosenLane * laneWidth;
     let lowestY = h + 40;
     this.bubbles.forEach(b => {
       if (b.y > lowestY) lowestY = b.y;
     });
     const startY = lowestY + 115;
 
-    // Check if we need another matching bubble
-    const currentMatches = this.bubbles.filter(b => b.data.value === this.currentTarget).length;
-    const eq = (currentMatches < 2)
+    const eq = needMatch
       ? EquationGenerator.createCorrectEquation(this.currentTarget, this.level)
       : EquationGenerator.createDistractorEquation(this.currentTarget, this.level);
 
@@ -372,22 +411,44 @@ export class GameScene extends Container {
   }
 
   ensureMatchingBubblesExist(requiredCount = 1) {
+    const w = this.app.screen.width;
     const h = this.app.screen.height;
+    const playW = Math.min(w * 0.90, 520);
+    const startLeft = (w - playW) / 2 + 50;
+    const numLanes = 3;
+    const laneWidth = (playW - 100) / (numLanes - 1);
+
     const matching = this.bubbles.filter(b => b.data.value === this.currentTarget);
+    if (matching.length >= requiredCount) return;
 
-    if (matching.length < requiredCount) {
-      // Find candidate distractor bubbles that are visible or emerging
-      const candidates = this.bubbles
-        .filter(b => b.data.value !== this.currentTarget)
-        .sort((a, b) => Math.abs(a.y - h * 0.55) - Math.abs(b.y - h * 0.55));
+    // Track which lanes already have a matching bubble
+    const targetLanes = new Set(
+      matching.map(b => Math.max(0, Math.min(numLanes - 1, Math.round((b.laneX - startLeft) / laneWidth))))
+    );
 
-      const needed = requiredCount - matching.length;
-      for (let i = 0; i < needed && i < candidates.length; i++) {
-        const candidate = candidates[i];
-        const newEq = EquationGenerator.createCorrectEquation(this.currentTarget, this.level);
-        candidate.data = newEq;
-        candidate.txtNode.text = newEq.text;
-      }
+    // Candidate bubbles to convert to target
+    const candidates = this.bubbles.filter(b => b.data.value !== this.currentTarget);
+
+    // Sort candidates: prioritize lanes without target first, then middle height + randomness
+    candidates.sort((a, b) => {
+      const aLane = Math.max(0, Math.min(numLanes - 1, Math.round((a.laneX - startLeft) / laneWidth)));
+      const bLane = Math.max(0, Math.min(numLanes - 1, Math.round((b.laneX - startLeft) / laneWidth)));
+      const aHas = targetLanes.has(aLane) ? 1 : 0;
+      const bHas = targetLanes.has(bLane) ? 1 : 0;
+      if (aHas !== bHas) return aHas - bHas;
+      const distA = Math.abs(a.y - h * 0.55);
+      const distB = Math.abs(b.y - h * 0.55);
+      return (distA - distB) + (Math.random() - 0.5) * 50;
+    });
+
+    const needed = requiredCount - matching.length;
+    for (let i = 0; i < needed && i < candidates.length; i++) {
+      const candidate = candidates[i];
+      const newEq = EquationGenerator.createCorrectEquation(this.currentTarget, this.level);
+      candidate.data = newEq;
+      candidate.txtNode.text = newEq.text;
+      const cLane = Math.max(0, Math.min(numLanes - 1, Math.round((candidate.laneX - startLeft) / laneWidth)));
+      targetLanes.add(cLane);
     }
   }
 
@@ -560,9 +621,19 @@ export class GameScene extends Container {
         }
         b.y = lowestY + 115;
 
-        // Refresh equation on recycle
-        const matchesOnScreen = this.bubbles.filter(x => x !== b && x.data.value === this.currentTarget).length;
-        const newEq = (matchesOnScreen < 2)
+        // Refresh equation on recycle with balanced lane logic
+        const matchesOnScreen = this.bubbles.filter(x => x !== b && x.data.value === this.currentTarget);
+        const playW = Math.min(w * 0.90, 520);
+        const startLeft = (w - playW) / 2 + 50;
+        const numLanes = 3;
+        const laneWidth = (playW - 100) / (numLanes - 1);
+        const bLane = Math.max(0, Math.min(numLanes - 1, Math.round((b.laneX - startLeft) / laneWidth)));
+        const targetLanes = new Set(
+          matchesOnScreen.map(x => Math.max(0, Math.min(numLanes - 1, Math.round((x.laneX - startLeft) / laneWidth))))
+        );
+
+        const shouldBeTarget = (matchesOnScreen.length < 2) && !targetLanes.has(bLane);
+        const newEq = shouldBeTarget
           ? EquationGenerator.createCorrectEquation(this.currentTarget, this.level)
           : EquationGenerator.createDistractorEquation(this.currentTarget, this.level);
 
