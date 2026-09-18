@@ -43,6 +43,7 @@
 ├── index.html
 ├── package.json
 ├── capacitor.config.json
+├── IMAGE_PROMPTS.md            # AI prompt generation kit for store & app graphics
 ├── PLAY_CONSOLE_METADATA.md    # Play Console ASO/AEO kit & privacy policy
 └── PROJECT_INFO.md
 ```
