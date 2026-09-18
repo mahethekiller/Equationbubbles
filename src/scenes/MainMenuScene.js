@@ -3,6 +3,7 @@ import { PaperCraft } from '../graphics/PaperCraft.js';
 import { Backgrounds } from '../graphics/Backgrounds.js';
 import { audioSynth } from '../audio/AudioSynth.js';
 import { gameState } from '../game/GameState.js';
+import { adService } from '../services/AdService.js';
 
 export class MainMenuScene extends Container {
   constructor(app, sceneManager) {
@@ -30,6 +31,7 @@ export class MainMenuScene extends Container {
     const h = this.app.screen.height;
 
     Backgrounds.drawCardboard(this.bg, w, h);
+    adService.showBanner();
 
     // 1. Decorative background floating equation bubbles (relative to center)
     const cx = w * 0.5;

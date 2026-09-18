@@ -3,6 +3,7 @@ import { PaperCraft } from '../graphics/PaperCraft.js';
 import { Backgrounds } from '../graphics/Backgrounds.js';
 import { audioSynth } from '../audio/AudioSynth.js';
 import { gameState } from '../game/GameState.js';
+import { adService } from '../services/AdService.js';
 
 export class LevelSelectScene extends Container {
   constructor(app, sceneManager) {
@@ -47,6 +48,7 @@ export class LevelSelectScene extends Container {
     const cx = w * 0.5;
 
     Backgrounds.drawCardboard(this.bg, w, h);
+    adService.showBanner();
 
     // 1. Top Header Layer (Structured rows to eliminate any overlap)
     // Row A: Top Bar (y = 28)

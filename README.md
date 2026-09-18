@@ -150,7 +150,21 @@ Ten progressive worlds carefully scaffold mathematical confidence from basic add
 The project is built with responsiveness and mobile wrapping in mind:
 - **Canvas Fluidity:** Auto-resizing via `resizeTo: window` and `autoDensity: true` to seamlessly adapt to 16:9 phones and 4:3 tablets.
 - **Fast Touch Input:** Event bindings use `pointerdown` and `pointerup` to eliminate touch delay.
-- **Capacitor Ready:** Easily embeddable as an Android APK or iOS app via Capacitor or Cordova.
+- **Capacitor Native Android:** Fully scaffolded Android Studio project in `android/` powered by `@capacitor/core` and `@capacitor/android`.
+- **Google AdMob Monetization:**
+  - Integrated via `@capacitor-community/admob` with full COPPA & Designed for Families policy enforcement (`tagForChildDirectedTreatment: true`, G content rating).
+  - Sticky banner on menu screens, non-intrusive milestone interstitials, and voluntary rewarded video revives (`🎬 REVIVE (+3 ❤️)`).
+  - Web development mock fallback so browser testing remains 100% functional without native hardware.
+
+### Android Build & Run
+```bash
+# Build web bundle and sync to Android project
+npm run build
+npx cap sync android
+
+# Open in Android Studio
+npx cap open android
+```
 
 ---
 

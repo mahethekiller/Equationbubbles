@@ -2,6 +2,7 @@ import { Container, Graphics, Text } from 'pixi.js';
 import { PaperCraft } from '../graphics/PaperCraft.js';
 import { audioSynth } from '../audio/AudioSynth.js';
 import { gameState } from '../game/GameState.js';
+import { adService } from '../services/AdService.js';
 
 export class ResultsModal extends Container {
   constructor(app, sceneManager) {
@@ -202,19 +203,35 @@ export class ResultsModal extends Container {
       });
       this.modalContent.addChild(menuBtn);
     } else {
-      // Standard 2 Buttons: REPLAY & MENU
-      const btnW = sheetW * 0.40;
-      const btnH = 46;
-      const btnY = sheetH * 0.38;
+      // Player Lost: Offer REVIVE with Rewarded Ad
+      const reviveBtnW = sheetW * 0.82;
+      const reviveBtnH = 46;
+      const reviveBtnY = sheetH * 0.32;
 
-      const replayBtn = this.createActionButton('REPLAY', -sheetW * 0.23, btnY, btnW, btnH, 0x66bb6a, () => {
+      const reviveBtn = this.createActionButton('🎬 REVIVE (+3 ❤️)', 0, reviveBtnY, reviveBtnW, reviveBtnH, 0xffca28, () => {
+        audioSynth.playClick();
+        adService.showRewarded(() => {
+          this.sceneManager.closeModal();
+          if (this.sceneManager.scenes.game) {
+            this.sceneManager.scenes.game.revivePlayer();
+          }
+        });
+      });
+      this.modalContent.addChild(reviveBtn);
+
+      // Secondary Row: REPLAY (Green) & MENU (Blue)
+      const subBtnW = sheetW * 0.39;
+      const subBtnH = 42;
+      const subBtnY = sheetH * 0.42;
+
+      const replayBtn = this.createActionButton('REPLAY', -sheetW * 0.22, subBtnY, subBtnW, subBtnH, 0x66bb6a, () => {
         audioSynth.playClick();
         this.sceneManager.closeModal();
         this.sceneManager.goToScene('game', { level: this.data.level });
       });
       this.modalContent.addChild(replayBtn);
 
-      const menuBtn = this.createActionButton('MENU', sheetW * 0.23, btnY, btnW, btnH, 0x42a5f5, () => {
+      const menuBtn = this.createActionButton('MENU', sheetW * 0.22, subBtnY, subBtnW, subBtnH, 0x42a5f5, () => {
         audioSynth.playClick();
         this.sceneManager.closeModal();
         this.sceneManager.goToScene('menu');

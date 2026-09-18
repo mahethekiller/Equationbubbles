@@ -4,6 +4,7 @@ import { Backgrounds } from '../graphics/Backgrounds.js';
 import { audioSynth } from '../audio/AudioSynth.js';
 import { gameState } from '../game/GameState.js';
 import { EquationGenerator } from '../game/EquationGenerator.js';
+import { adService } from '../services/AdService.js';
 
 export class GameScene extends Container {
   constructor(app, sceneManager) {
@@ -58,6 +59,9 @@ export class GameScene extends Container {
     this.targetQuota = Math.min(10, 4 + Math.floor(this.level * 0.08));
     this.timerSeconds = Math.min(65, 42 + Math.floor(this.level * 0.22));
     this.isGameOver = false;
+
+    // Hide banner ads during active gameplay
+    adService.hideBanner();
 
     // Clear active objects
     this.bubbleLayer.removeChildren();
@@ -549,6 +553,9 @@ export class GameScene extends Container {
     const stars = Math.max(1, this.lives);
     gameState.recordLevelScore(this.level, this.score, stars);
 
+    // Show interstitial ad after level completion (subject to 90s cooldown & 3-level threshold)
+    adService.showInterstitial();
+
     setTimeout(() => {
       this.sceneManager.openModal('results', {
         won: true,
@@ -558,6 +565,18 @@ export class GameScene extends Container {
         level: this.level
       });
     }, 650);
+  }
+
+  /**
+   * Revive player from rewarded ad with full hearts
+   */
+  revivePlayer() {
+    this.lives = 3;
+    this.isGameOver = false;
+    this.timerSeconds = Math.max(this.timerSeconds, 25);
+    this.updateHUD();
+    this.ensureMatchingBubblesExist(2);
+    audioSynth.playCorrect();
   }
 
   handleGameOver(won) {

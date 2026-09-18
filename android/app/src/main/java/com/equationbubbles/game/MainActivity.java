@@ -1,0 +1,5 @@
+package com.equationbubbles.game;
+
+import com.getcapacitor.BridgeActivity;
+
+public class MainActivity extends BridgeActivity {}
