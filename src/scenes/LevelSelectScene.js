@@ -19,6 +19,10 @@ export class LevelSelectScene extends Container {
     this.scrollContainer = new Container();
     this.addChild(this.scrollContainer);
 
+    this.scrollMask = new Graphics();
+    this.addChild(this.scrollMask);
+    this.scrollContainer.mask = this.scrollMask;
+
     // Static header layer (stays fixed above scrolling content)
     this.headerLayer = new Container();
     this.addChild(this.headerLayer);
@@ -40,34 +44,56 @@ export class LevelSelectScene extends Container {
 
     const w = this.app.screen.width;
     const h = this.app.screen.height;
+    const cx = w * 0.5;
 
     Backgrounds.drawCardboard(this.bg, w, h);
 
-    // 1. Top Header Layer (Fixed)
+    // 1. Top Header Layer (Structured rows to eliminate any overlap)
+    // Row A: Top Bar (y = 28)
     // Green "← BACK" button on top-left
-    const backBtn = this.createBackButton(58, 44, () => {
+    const backBtn = this.createBackButton(52, 28, () => {
       audioSynth.playClick();
       this.sceneManager.goToScene('menu');
     });
     this.headerLayer.addChild(backBtn);
 
-    // Center Taped World Banner
-    const banner = this.createWorldBanner(w * 0.52, 44);
+    // Total stars progress on top-right
+    const totalStarsBadge = this.createTotalStarsBadge(w - 52, 28);
+    this.headerLayer.addChild(totalStarsBadge);
+
+    // Row B: Centered Taped World Banner (y = 80)
+    const bannerW = Math.min(w * 0.9, 320);
+    const banner = this.createWorldBanner(cx, 80, bannerW);
     this.headerLayer.addChild(banner);
 
-    // World Navigation Bar (Prev / Next World tabs)
-    const navY = 96;
-    if (this.currentWorld > 1) {
-      const prevBtn = this.createWorldNavButton('◀ PREV WORLD', w * 0.28, navY, () => {
+    // Row C: World Navigation Tabs (y = 126)
+    const navY = 126;
+    const hasPrev = this.currentWorld > 1;
+    const hasNext = this.currentWorld < 10;
+
+    if (hasPrev && hasNext) {
+      const prevBtn = this.createWorldNavButton('◀ PREV WORLD', cx - 74, navY, () => {
+        audioSynth.playClick();
+        this.currentWorld--;
+        this.setupUI();
+      });
+      const nextBtn = this.createWorldNavButton('NEXT WORLD ▶', cx + 74, navY, () => {
+        audioSynth.playClick();
+        this.currentWorld++;
+        this.setupUI();
+      });
+      this.headerLayer.addChild(prevBtn, nextBtn);
+    } else if (hasPrev) {
+      // Single centered button (e.g. World 10)
+      const prevBtn = this.createWorldNavButton('◀ PREV WORLD', cx, navY, () => {
         audioSynth.playClick();
         this.currentWorld--;
         this.setupUI();
       });
       this.headerLayer.addChild(prevBtn);
-    }
-
-    if (this.currentWorld < 10) {
-      const nextBtn = this.createWorldNavButton('NEXT WORLD ▶', w * 0.72, navY, () => {
+    } else if (hasNext) {
+      // Single centered button (e.g. World 1)
+      const nextBtn = this.createWorldNavButton('NEXT WORLD ▶', cx, navY, () => {
         audioSynth.playClick();
         this.currentWorld++;
         this.setupUI();
@@ -75,18 +101,21 @@ export class LevelSelectScene extends Container {
       this.headerLayer.addChild(nextBtn);
     }
 
+    // Clip scrolling badges neatly below navigation bar
+    this.scrollMask.clear();
+    this.scrollMask.rect(0, 150, w, Math.max(10, h - 150)).fill({ color: 0xffffff });
+
     // 2. Winding Level Path Nodes for Current World (10 levels)
     const startLevel = (this.currentWorld - 1) * 10 + 1;
     const levelsInWorld = 10;
 
     const nodeRadius = 38;
     const rowHeight = 110;
-    const startY = 160;
+    const startY = 190;
 
     // S-curve winding coordinates centered within comfortable width
     const nodePositions = [];
     const maxContentW = Math.min(w * 0.9, 440);
-    const cx = w * 0.5;
     const colLeft = cx - maxContentW * 0.34;
     const colCenter = cx;
     const colRight = cx + maxContentW * 0.34;
@@ -135,15 +164,16 @@ export class LevelSelectScene extends Container {
     this.scrollContainer.position.y = 0;
   }
 
-  createWorldBanner(cx, cy) {
+  createWorldBanner(cx, cy, bannerW = 280) {
     const container = new Container();
     container.position.set(cx, cy);
 
     const worldName = gameState.getWorldName(this.currentWorld);
     const starsEarned = gameState.getWorldStars(this.currentWorld);
+    const bannerH = 58;
 
     // White torn paper rectangle
-    const banner = PaperCraft.createTornRect(260, 56, {
+    const banner = PaperCraft.createTornRect(bannerW, bannerH, {
       color: 0xffffff,
       jitter: 2,
       shadow: true,
@@ -153,23 +183,26 @@ export class LevelSelectScene extends Container {
     container.addChild(banner);
 
     // Tape on left and right ends
-    const tape1 = PaperCraft.createTapeStrip(-115, 0, 36, 16, 0.4);
-    const tape2 = PaperCraft.createTapeStrip(115, 0, 36, 16, -0.4);
+    const tape1 = PaperCraft.createTapeStrip(-bannerW * 0.44, 0, 32, 15, 0.35);
+    const tape2 = PaperCraft.createTapeStrip(bannerW * 0.44, 0, 32, 15, -0.35);
     container.addChild(tape1, tape2);
 
-    // World Title
+    // World Title with dynamic font size for long world titles
+    const titleStr = `WORLD ${this.currentWorld}: ${worldName.toUpperCase()}`;
+    const fontSize = titleStr.length > 25 ? 12.5 : (titleStr.length > 20 ? 14 : 15.5);
+
     const titleTxt = new Text({
-      text: `WORLD ${this.currentWorld}: ${worldName.toUpperCase()}`,
+      text: titleStr,
       style: {
         fontFamily: 'Fredoka, "Comic Neue", Arial',
-        fontSize: 16,
+        fontSize,
         fontWeight: 'bold',
         fill: 0xc62828,
-        letterSpacing: 1
+        letterSpacing: 0.5
       }
     });
     titleTxt.anchor.set(0.5);
-    titleTxt.position.set(0, -9);
+    titleTxt.position.set(0, -10);
     container.addChild(titleTxt);
 
     // Stars Tracker
@@ -177,14 +210,47 @@ export class LevelSelectScene extends Container {
       text: `${starsEarned} / 30 ★`,
       style: {
         fontFamily: 'Fredoka, Arial',
-        fontSize: 15,
+        fontSize: 14,
         fontWeight: 'bold',
         fill: 0xf57f17
       }
     });
     starTxt.anchor.set(0.5);
-    starTxt.position.set(0, 12);
+    starTxt.position.set(0, 13);
     container.addChild(starTxt);
+
+    return container;
+  }
+
+  createTotalStarsBadge(x, y) {
+    const container = new Container();
+    container.position.set(x, y);
+
+    const totalStars = gameState.totalStars || 0;
+
+    const paper = PaperCraft.createTornRect(76, 32, {
+      color: 0xfff9c4,
+      jitter: 1.5,
+      shadow: true,
+      shadowOffset: { x: 2, y: 3 },
+      shadowAlpha: 0.22
+    });
+    container.addChild(paper);
+
+    const tape = PaperCraft.createTapeStrip(0, -14, 26, 10, -0.05);
+    container.addChild(tape);
+
+    const txt = new Text({
+      text: `★ ${totalStars}`,
+      style: {
+        fontFamily: 'Fredoka, Arial',
+        fontSize: 13.5,
+        fontWeight: 'bold',
+        fill: 0xf57f17
+      }
+    });
+    txt.anchor.set(0.5);
+    container.addChild(txt);
 
     return container;
   }
@@ -233,7 +299,7 @@ export class LevelSelectScene extends Container {
     container.cursor = 'pointer';
 
     // Green paper scrap
-    const paper = PaperCraft.createTornRect(85, 40, {
+    const paper = PaperCraft.createTornRect(80, 34, {
       color: 0x66bb6a,
       jitter: 2,
       shadow: true,
@@ -243,14 +309,14 @@ export class LevelSelectScene extends Container {
     container.addChild(paper);
 
     // Top tape
-    const tape = PaperCraft.createTapeStrip(0, -18, 34, 13, 0.05);
+    const tape = PaperCraft.createTapeStrip(0, -15, 30, 11, 0.05);
     container.addChild(tape);
 
     const txt = new Text({
       text: '← BACK',
       style: {
         fontFamily: 'Fredoka, "Comic Neue", Arial',
-        fontSize: 16,
+        fontSize: 14.5,
         fontWeight: 'bold',
         fill: 0x1b5e20
       }
@@ -267,7 +333,6 @@ export class LevelSelectScene extends Container {
 
     return container;
   }
-
   drawDottedCurve(g, x1, y1, x2, y2) {
     const cx = (x1 + x2) / 2;
     const cy = (y1 + y2) / 2;
