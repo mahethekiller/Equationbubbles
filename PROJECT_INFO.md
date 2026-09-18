@@ -42,6 +42,8 @@
 │   └── main.js                 # PixiJS v8 Application bootstrap & resizing
 ├── index.html
 ├── package.json
+├── capacitor.config.json
+├── PLAY_CONSOLE_METADATA.md    # Play Console ASO/AEO kit & privacy policy
 └── PROJECT_INFO.md
 ```
 
